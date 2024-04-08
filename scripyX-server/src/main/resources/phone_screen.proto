@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package com.mark.protos;
+
+message PhoneScreenData {
+  // 时间戳，用于同步或记录数据的时间点
+  int64 timestamp = 1;
+
+  // 画面数据的字节流，可以是H.264编码或其他格式
+  bytes screen_data = 2;
+
+  // 画面的宽度和高度
+  int32 width = 3;
+  int32 height = 4;
+
+  // 其他可能的元数据，如帧率、比特率等
+  // ...
+}
+
+// 服务端和客户端之间传输的消息
+message PhoneScreenMessage {
+  // 消息类型，用于区分不同的消息（例如：画面数据、控制指令等）
+  enum MessageType {
+    SCREEN_DATA = 0;
+    CONTROL_COMMAND = 1;
+    // ... 其他类型
+  }
+
+  MessageType type = 1;
+
+  // 根据消息类型，包含相应的数据
+  oneof data {
+    PhoneScreenData screen_data = 2;
+    // ControlCommand control_command = 3; // 如果有控制指令的话
+    // ... 其他可能的消息体
+  }
+}
