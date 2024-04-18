@@ -10,15 +10,22 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class NettyServerConfig {
-    private final int port = 8255;
+public class NettyServerConfig implements CommandLineRunner, DisposableBean {
 
-    public void start() throws InterruptedException {
-        NioEventLoopGroup bossGroup = new NioEventLoopGroup();
-        NioEventLoopGroup workerGroup = new NioEventLoopGroup();
+    private ChannelFuture future;
+    NioEventLoopGroup bossGroup;
+    NioEventLoopGroup workerGroup;
+    private final int port = 8255;
+    private final String host = "127.0.0.1";
+
+    public void start() {
+        bossGroup = new NioEventLoopGroup();
+        workerGroup = new NioEventLoopGroup();
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
@@ -32,11 +39,28 @@ public class NettyServerConfig {
                             pipeline.addLast(new ServerHandler());
                         }
                     });
-            ChannelFuture future = bootstrap.bind(port).sync();
-            future.channel().closeFuture().sync();
+            this.future = bootstrap.bind(host, port).syncUninterruptibly();
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
+//            future.channel().closeFuture().sync();
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        start();
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        // future表示服务器绑定到端口并准备接受连接的异步操作
+        // isDone()用于判断future这个操作完成与否，
+        if (future != null && !future.isDone()) {
+            // closeFuture()能够返回一个特殊的future（表示关闭操作），sync()或syncUninterruptibly()用于阻塞当前线程，直到操作完成
+            future.channel().closeFuture().syncUninterruptibly();
+        }
+        bossGroup.shutdownGracefully();
+        workerGroup.shutdownGracefully();
     }
 }
