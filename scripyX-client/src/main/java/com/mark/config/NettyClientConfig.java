@@ -35,11 +35,12 @@ public class NettyClientConfig implements CommandLineRunner, DisposableBean {
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
                             pipeline.addLast(new VideoDataHandler());
+//                            pipeline.addLast(new StringEncoder());
                         }
                     });
-            channel = bootstrap.connect(host, port).syncUninterruptibly().channel();
+            channel = bootstrap.connect(host, port).sync().channel();
         } finally {
-            group.shutdownGracefully();
+//            group.shutdownGracefully();
         }
     }
 

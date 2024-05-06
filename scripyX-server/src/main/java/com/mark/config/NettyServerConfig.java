@@ -10,10 +10,12 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 
+@Slf4j
 @Configuration
 public class NettyServerConfig implements CommandLineRunner, DisposableBean {
 
@@ -27,24 +29,23 @@ public class NettyServerConfig implements CommandLineRunner, DisposableBean {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
 
-        try {
-            ServerBootstrap bootstrap = new ServerBootstrap();
-            bootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new ServerHandler());
-                        }
-                    });
-            this.future = bootstrap.bind(host, port).syncUninterruptibly();
-        } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+        ServerBootstrap bootstrap = new ServerBootstrap();
+        bootstrap.group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .handler(new LoggingHandler(LogLevel.INFO))
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline pipeline = ch.pipeline();
+//                        pipeline.addLast(new StringDecoder());
+                        pipeline.addLast(new ServerHandler());
+                    }
+                });
+        this.future = bootstrap.bind(host, port).syncUninterruptibly();
+        boolean active = future.channel().isActive();
+        if (active) {
+            log.info("-----服务端启动成功-----");
         }
-//            future.channel().closeFuture().sync();
     }
 
     @Override
