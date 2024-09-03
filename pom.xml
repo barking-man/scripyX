@@ -28,6 +28,7 @@
         <module>scripyX-server</module>
         <module>scripyX-client</module>
         <module>scripyX-common</module>
+        <module>scripyX-admin</module>
     </modules>
 
 
@@ -58,6 +59,10 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.107.Final</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-context</artifactId>
+            <version>2.2.5.RELEASE</version>
+        </dependency>
     </dependencies>
 </project>
