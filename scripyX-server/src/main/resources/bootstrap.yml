@@ -3,6 +3,15 @@ server:
 spring:
   application:
     name: scripyXServer
+  boot:
+    admin:
+      client:
+        url: http://localhost:7000
+        instance:
+          # 客户端使用ip地址注册，而非主机名
+          prefer-ip: true
+        # 表示客户端只注册一次，false表示如果注册失败，会再次重试
+        register-once: false
   profiles:
     active: dev
   cloud:
@@ -14,3 +23,17 @@ spring:
         server-addr: 127.0.0.1:8848
         file-extension: yml
         namespace: scripyX
+management:
+  endpoints:
+    # web应用采用该方式暴露端点
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      # 展示详细信息，默认只展示是否在线
+      show-details: ALWAYS
+    shutdown:
+      # 启用关闭应用功能，不启用则无法关闭
+      enabled: true
+

@@ -8,3 +8,6 @@ management:
   endpoint:
     health:
       show-details: always
+logging:
+  file:
+    name: logs/scripyXServer/info.log
